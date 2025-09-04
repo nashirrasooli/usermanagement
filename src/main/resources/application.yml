@@ -1,0 +1,17 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5433/userdb
+    username: postgres
+    password: 123
+  jpa:
+    hibernate:
+      ddl-auto: update # dev-friendly; for prod use 'validate' + migrations
+    properties:
+      hibernate:
+        format_sql: true
+        jdbc.time_zone: UTC
+  jackson:
+    serialization:
+      WRITE_DATES_AS_TIMESTAMPS: false
+server:
+  port: 8080
