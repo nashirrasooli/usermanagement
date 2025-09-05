@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { createUser, deleteUser, listUsers, updateUser } from './api';
 import type { Role, User, UserRequest } from './types';
+import { useAuth } from './auth';
 
 const emptyForm: UserRequest = {
   firstName: '',
@@ -17,6 +18,7 @@ export default function App() {
   const [error, setError] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
   const [q, setQ] = useState<string>(''); // simple client-side filter
+  const { logout } = useAuth();
 
   const load = async () => {
     setLoading(true);
@@ -217,6 +219,9 @@ export default function App() {
           </tbody>
         </table>
       </div>
+      <button onClick={logout} style={{ marginLeft: 12 }}>
+        Logout
+      </button>
     </div>
   );
 }

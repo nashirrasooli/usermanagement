@@ -5,7 +5,7 @@ spring:
     password: 123
   jpa:
     hibernate:
-      ddl-auto: update # dev-friendly; for prod use 'validate' + migrations
+      ddl-auto: update
     properties:
       hibernate:
         format_sql: true
@@ -13,5 +13,11 @@ spring:
   jackson:
     serialization:
       WRITE_DATES_AS_TIMESTAMPS: false
+
 server:
   port: 8080
+
+security:
+  jwt:
+    secret: 'SuXgLeIdVKvKlR4/Eq4MHRXeziSV2IR0YIUSb8NdZD4='
+    ttl-seconds: 36000

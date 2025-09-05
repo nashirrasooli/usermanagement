@@ -48,4 +48,8 @@ public class AppUser {
     @UpdateTimestamp
     @Column(nullable = false)
     private Instant updatedAt;
+    // ...
+    @Column(nullable = false)
+    private String passwordHash;
+
 }
