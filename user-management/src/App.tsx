@@ -1,6 +1,8 @@
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from './auth';
 import UsersList from './UsersList';
+import { Button } from 'primereact/button';
+import { Card } from 'primereact/card';
 
 export default function App() {
   const nav = useNavigate();
@@ -12,25 +14,25 @@ export default function App() {
   };
 
   return (
-    <div
-      style={{
-        maxWidth: 900,
-        margin: '24px auto',
-        fontFamily: 'system-ui, Arial',
-      }}
-    >
+    <Card style={{ maxWidth: 900, margin: '24px auto' }}>
       <div
         style={{
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
+          marginBottom: '1rem',
         }}
       >
-        <h2>Users</h2>
-        <button onClick={onLogout}>Logout</button>
+        <h2 style={{ margin: 0 }}>Users</h2>
+        <Button
+          label='Logout'
+          icon='pi pi-sign-out'
+          severity='secondary'
+          onClick={onLogout}
+        />
       </div>
 
       <UsersList />
-    </div>
+    </Card>
   );
 }
