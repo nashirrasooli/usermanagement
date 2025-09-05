@@ -9,6 +9,7 @@ export interface User {
   enabled: boolean;
   createdAt: string; // ISO date
   updatedAt: string; // ISO date
+  
 }
 
 export interface UserRequest {

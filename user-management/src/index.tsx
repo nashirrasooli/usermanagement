@@ -25,6 +25,7 @@ import { AuthProvider } from './auth';
 import App from './App';
 import ProtectedRoute from './ProtectedRoute';
 import Login from './login';
+import UserUpdate from './UserUpdate';
 
 console.log('React version loaded:', React.version);
 
@@ -34,6 +35,22 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <BrowserRouter>
         <Routes>
           <Route path='/login' element={<Login />} />
+          <Route
+            path='/users/new'
+            element={
+              <ProtectedRoute>
+                <UserUpdate />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path='/users/:id/edit'
+            element={
+              <ProtectedRoute>
+                <UserUpdate />
+              </ProtectedRoute>
+            }
+          />
           <Route
             path='/'
             element={
