@@ -1,5 +1,6 @@
-import { useEffect, useState, FormEvent } from 'react';
+import { FormEvent, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+
 import { InputText } from 'primereact/inputtext';
 import { Dropdown } from 'primereact/dropdown';
 import { Checkbox } from 'primereact/checkbox';
@@ -8,7 +9,13 @@ import { Button } from 'primereact/button';
 import { Message } from 'primereact/message';
 import { Card } from 'primereact/card';
 import { toast } from 'react-toastify';
-import { createUser, getUser, updateUser, User } from '../api';
+
+import {
+  useGetUserQuery,
+  useCreateUserMutation,
+  useUpdateUserMutation,
+  type User, // if you exported it from usersApi; otherwise keep your local type
+} from './usersApi'; // same folder as UsersList in your project
 
 const blank: User = {
   firstName: '',
@@ -24,34 +31,19 @@ export default function UserUpdate() {
   const isCreate = !id || id === 'new';
   const nav = useNavigate();
 
+  // RTK Query hooks
+  const { data: loadedUser, isLoading } = useGetUserQuery(id!, {
+    skip: isCreate,
+  });
+  const [createUser, { isLoading: creating }] = useCreateUserMutation();
+  const [updateUser, { isLoading: updating }] = useUpdateUserMutation();
+
   const [form, setForm] = useState<User>(blank);
-  const [loading, setLoading] = useState(!isCreate);
-  const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
-  // Load user when editing
   useEffect(() => {
-    let alive = true;
-
-    (async () => {
-      if (isCreate) return;
-      try {
-        setLoading(true);
-        const u = await getUser(id!);
-        if (!alive) return;
-        setForm({ ...u, password: '' }); // never prefill password
-      } catch (e: any) {
-        if (!alive) return;
-        setError(e?.response?.data?.message || 'Failed to load user');
-      } finally {
-        if (alive) setLoading(false);
-      }
-    })();
-
-    return () => {
-      alive = false;
-    };
-  }, [id, isCreate]);
+    if (loadedUser) setForm({ ...loadedUser, password: '' });
+  }, [loadedUser]);
 
   function onChange<K extends keyof User>(k: K, v: User[K]) {
     setForm((prev) => ({ ...prev, [k]: v }));
@@ -60,40 +52,38 @@ export default function UserUpdate() {
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
     setError('');
-    setSaving(true);
+
     try {
-      // simple front-end validation
+      // basic validation
       if (!form.firstName.trim()) throw new Error('First name is required');
       if (!form.lastName.trim()) throw new Error('Last name is required');
       if (!/^\S+@\S+\.\S+$/.test(form.email))
         throw new Error('Valid email is required');
 
       if (isCreate) {
-        if (!form.password || form.password.length < 6) {
+        if (!form.password || form.password.length < 6)
           throw new Error('Password (min 6 chars) is required for new users');
-        }
-        await createUser(form);
+        await createUser(form).unwrap();
         toast.success('User created!');
       } else {
         const { password, ...rest } = form;
-        // send password only if provided (non-empty)
-        const payload = password ? form : (rest as any);
-        await updateUser(id!, payload);
+        await updateUser({
+          id: id!,
+          data: password ? form : (rest as Partial<User>),
+        }).unwrap();
         toast.success('User updated!');
       }
 
-      // Go back to list and signal it to refresh
-      nav('/', { replace: true, state: { refreshed: true } });
-      // Alternatively: force a full reload if needed
-      // window.location.replace('/');
+      // go back; RTK Query will refetch the list because of invalidatesTags
+      nav('/', { replace: true });
     } catch (e: any) {
-      setError(e?.response?.data?.message || e.message || 'Save failed');
-    } finally {
-      setSaving(false);
+      setError(e?.data?.message || e?.message || 'Save failed');
     }
   }
 
-  if (loading) return <div className='p-4'>Loading…</div>;
+  if (!isCreate && isLoading) return <div className='p-4'>Loading…</div>;
+
+  const saving = creating || updating;
 
   return (
     <Card
@@ -137,7 +127,7 @@ export default function UserUpdate() {
             value={form.email}
             onChange={(e) => onChange('email', e.target.value)}
             className='w-full'
-            // disabled={!isCreate} // typically immutable
+            // disabled={!isCreate}
           />
         </div>
 
@@ -148,11 +138,11 @@ export default function UserUpdate() {
           <Dropdown
             id='role'
             value={form.role}
-            onChange={(e) => onChange('role', e.value)}
             options={[
               { label: 'USER', value: 'USER' },
               { label: 'ADMIN', value: 'ADMIN' },
             ]}
+            onChange={(e) => onChange('role', e.value)}
             className='w-full'
           />
         </div>
@@ -161,7 +151,7 @@ export default function UserUpdate() {
           <Checkbox
             inputId='enabled'
             checked={form.enabled}
-            onChange={(e) => onChange('enabled', e.checked ?? false)}
+            onChange={(e) => onChange('enabled', !!e.checked)}
           />
           <label htmlFor='enabled'>Enabled</label>
         </div>
@@ -197,6 +187,7 @@ export default function UserUpdate() {
             severity='secondary'
             onClick={() => nav('/')}
             icon='pi pi-times'
+            disabled={saving}
           />
         </div>
       </form>
