@@ -1,5 +1,7 @@
 package com.example.userbackend.user;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,33 +18,33 @@ public class AppUserService {
         this.repo = repo;
     }
 
-    // Default list (no filtering)
-    public List<UserResponse> findAll() {
-        return repo.findAll().stream().map(this::toResponse).toList();
-    }
+    public PageResponse<UserResponse> search(String firstName, String lastName, String q, Pageable pageable) {
+        String f = firstName == null ? "" : firstName.trim();
+        String l = lastName == null ? "" : lastName.trim();
+        String qq = q == null ? "" : q.trim();
 
-    // Flexible search: q (matches first or last), or firstName/lastName separately
-    public List<UserResponse> search(String q, String firstName, String lastName) {
-        List<AppUser> users;
-
-        boolean hasQ = q != null && !q.isBlank();
-        boolean hasFirst = firstName != null && !firstName.isBlank();
-        boolean hasLast = lastName != null && !lastName.isBlank();
-
-        if (hasQ) {
-            users = repo.findByFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCase(q.trim(), q.trim());
-        } else if (hasFirst && hasLast) {
-            users = repo.findByFirstNameContainingIgnoreCaseAndLastNameContainingIgnoreCase(firstName.trim(),
-                    lastName.trim());
-        } else if (hasFirst) {
-            users = repo.findByFirstNameContainingIgnoreCase(firstName.trim());
-        } else if (hasLast) {
-            users = repo.findByLastNameContainingIgnoreCase(lastName.trim());
+        Page<AppUser> page;
+        if (!qq.isBlank()) {
+            page = repo.findByFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCase(qq, qq, pageable);
+        } else if (!f.isBlank() && !l.isBlank()) {
+            page = repo.findByFirstNameContainingIgnoreCaseAndLastNameContainingIgnoreCase(f, l, pageable);
+        } else if (!f.isBlank()) {
+            page = repo.findByFirstNameContainingIgnoreCase(f, pageable);
+        } else if (!l.isBlank()) {
+            page = repo.findByLastNameContainingIgnoreCase(l, pageable);
         } else {
-            users = repo.findAll();
+            page = repo.findAll(pageable);
         }
 
-        return users.stream().map(this::toResponse).toList();
+        List<UserResponse> items = page.getContent().stream().map(this::toResponse).toList();
+        return new PageResponse<>(
+                items,
+                page.getNumber(),
+                page.getSize(),
+                page.getTotalElements(),
+                page.getTotalPages(),
+                page.isFirst(),
+                page.isLast());
     }
 
     public UserResponse findById(UUID id) {
@@ -68,8 +70,7 @@ public class AppUserService {
     }
 
     public void delete(UUID id) {
-        AppUser u = require(id);
-        repo.delete(u);
+        repo.delete(require(id));
     }
 
     // Helpers

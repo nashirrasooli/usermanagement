@@ -1,8 +1,9 @@
 package com.example.userbackend.user;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.util.List;
 import java.util.UUID;
 
 public interface AppUserRepository extends JpaRepository<AppUser, UUID> {
@@ -10,12 +11,14 @@ public interface AppUserRepository extends JpaRepository<AppUser, UUID> {
 
     boolean existsByEmailIgnoreCaseAndIdNot(String email, UUID id);
 
-    // Search helpers
-    List<AppUser> findByFirstNameContainingIgnoreCase(String first);
+    // --- Paged search variants ---
+    Page<AppUser> findByFirstNameContainingIgnoreCase(String first, Pageable pageable);
 
-    List<AppUser> findByLastNameContainingIgnoreCase(String last);
+    Page<AppUser> findByLastNameContainingIgnoreCase(String last, Pageable pageable);
 
-    List<AppUser> findByFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCase(String first, String last);
+    Page<AppUser> findByFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCase(String first, String last,
+            Pageable pageable);
 
-    List<AppUser> findByFirstNameContainingIgnoreCaseAndLastNameContainingIgnoreCase(String first, String last);
+    Page<AppUser> findByFirstNameContainingIgnoreCaseAndLastNameContainingIgnoreCase(String first, String last,
+            Pageable pageable);
 }

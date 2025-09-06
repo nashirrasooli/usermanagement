@@ -1,10 +1,12 @@
 package com.example.userbackend.user;
 
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -18,13 +20,19 @@ public class AppUserController {
         this.service = service;
     }
 
-    // GET /api/users?q=... OR /api/users?firstName=...&lastName=...
+    /**
+     * Examples:
+     * GET /api/users?page=0&size=10&sort=createdAt,desc
+     * GET /api/users?firstName=kab&page=0&size=5
+     * GET /api/users?q=ali&sort=lastName,asc
+     */
     @GetMapping
-    public List<UserResponse> all(
-            @RequestParam(required = false) String q,
+    public PageResponse<UserResponse> all(
             @RequestParam(required = false) String firstName,
-            @RequestParam(required = false) String lastName) {
-        return service.search(q, firstName, lastName);
+            @RequestParam(required = false) String lastName,
+            @RequestParam(required = false, name = "q") String q,
+            @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC, size = 10) Pageable pageable) {
+        return service.search(firstName, lastName, q, pageable);
     }
 
     @GetMapping("{id}")
