@@ -4,6 +4,7 @@ import { useListUsersQuery, useDeleteUserMutation } from './features/usersApi';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { Button } from 'primereact/button';
+import { toast } from 'react-toastify';
 
 export default function UsersList() {
   const { data: users = [], isLoading } = useListUsersQuery();
@@ -18,9 +19,19 @@ export default function UsersList() {
         label='Delete'
         icon='pi pi-trash'
         severity='danger'
+        // onClick={async () => {
+        //   if (row.id && window.confirm(`Delete ${row.email}?`)) {
+        //     await deleteUser(row.id);
+        //   }
+        // }}
         onClick={async () => {
-          if (row.id && window.confirm(`Delete ${row.email}?`)) {
-            await deleteUser(row.id);
+          try {
+            if (row.id && window.confirm(`Delete ${row.email}?`)) {
+              await deleteUser(row.id).unwrap();
+              toast.success('User deleted');
+            }
+          } catch (e: any) {
+            toast.error('Delete failed');
           }
         }}
       />

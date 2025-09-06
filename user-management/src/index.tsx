@@ -13,6 +13,7 @@ import Login from './login';
 import UserUpdate from './UserUpdate';
 import { Provider } from 'react-redux';
 import { store } from './store';
+import { ToastContainer } from 'react-toastify';
 
 console.log('React version loaded:', React.version);
 
@@ -48,6 +49,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
           />
         </Routes>
       </BrowserRouter>
+      <ToastContainer position='top-right' autoClose={3000} />
     </React.StrictMode>
   </Provider>
 );

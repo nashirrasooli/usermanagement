@@ -8,6 +8,7 @@ import { Password } from 'primereact/password';
 import { Button } from 'primereact/button';
 import { Message } from 'primereact/message';
 import { Card } from 'primereact/card';
+import { toast } from 'react-toastify';
 
 const blank: User = {
   firstName: '',
@@ -72,11 +73,13 @@ export default function UserUpdate() {
           throw new Error('Password (min 6 chars) is required for new users');
         }
         await createUser(form);
+        toast.success('User created!');
       } else {
         const { password, ...rest } = form;
         // send password only if provided (non-empty)
         const payload = password ? form : (rest as any);
         await updateUser(id!, payload);
+        toast.success('User updated!');
       }
 
       // Go back to list and signal it to refresh

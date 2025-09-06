@@ -4,6 +4,7 @@ import { useAuth } from './auth';
 import UsersList from './UsersList';
 import { Toolbar } from 'primereact/toolbar';
 import { Button } from 'primereact/button';
+import { toast } from 'react-toastify';
 
 export default function App() {
   const nav = useNavigate();
@@ -11,6 +12,8 @@ export default function App() {
 
   const onLogout = () => {
     logout();
+    toast.info('Logged out');
+
     nav('/login', { replace: true });
   };
 

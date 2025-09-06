@@ -5,6 +5,7 @@ import { InputText } from 'primereact/inputtext';
 import { Password } from 'primereact/password';
 import { Button } from 'primereact/button';
 import { Message } from 'primereact/message';
+import { toast } from 'react-toastify';
 
 export default function Login() {
   const { login } = useAuth(); // Redux-backed hook
@@ -44,11 +45,13 @@ export default function Login() {
 
       // ✅ Also update Redux (keeps app state in sync)
       login(data.accessToken);
+      toast.success('Logged in successfully!');
 
       // Redirect to app
       window.location.href = '/';
     } catch (err: any) {
       setError(err?.message || 'Login failed');
+      toast.error(err.message || 'Login failed');
     } finally {
       setLoading(false);
     }
