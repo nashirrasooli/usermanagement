@@ -186,12 +186,14 @@ export default function UserUpdate() {
             type='submit'
             label={isCreate ? 'Create' : 'Save changes'}
             loading={saving}
+            icon='pi pi-user'
           />
           <Button
             type='button'
             label='Cancel'
             severity='secondary'
             onClick={() => nav('/')}
+            icon='pi pi-times'
           />
         </div>
       </form>
