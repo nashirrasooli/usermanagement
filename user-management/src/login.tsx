@@ -7,15 +7,17 @@ import { Button } from 'primereact/button';
 import { Message } from 'primereact/message';
 
 export default function Login() {
-  const { login } = useAuth();
+  const { login } = useAuth(); // Redux-backed hook
   const [email, setEmail] = useState('admin@example.com');
   const [password, setPassword] = useState('admin123');
   const [error, setError] = useState('');
   const [visible, setVisible] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
     setError('');
+    setLoading(true);
     try {
       const r = await fetch(
         (process.env.REACT_APP_API_BASE_URL ?? 'http://localhost:8080/api') +
@@ -26,12 +28,29 @@ export default function Login() {
           body: JSON.stringify({ email, password }),
         }
       );
-      if (!r.ok) throw new Error('Login failed');
+
+      if (!r.ok) {
+        const maybeJson = await r
+          .json()
+          .catch(() => ({ message: 'Login failed' }));
+        throw new Error(maybeJson?.message || 'Login failed');
+      }
+
+      // Backend response shape: { accessToken, tokenType }
       const data = await r.json();
+
+      // ✅ Save under "token" so axios interceptor picks it up
+      localStorage.setItem('token', data.accessToken);
+
+      // ✅ Also update Redux (keeps app state in sync)
       login(data.accessToken);
+
+      // Redirect to app
       window.location.href = '/';
     } catch (err: any) {
-      setError(err.message || 'Login failed');
+      setError(err?.message || 'Login failed');
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -51,7 +70,6 @@ export default function Login() {
         blockScroll
       >
         <form onSubmit={onSubmit} className='flex flex-column gap-3'>
-          {/* Email */}
           <div className='field'>
             <label htmlFor='email' className='block mb-2'>
               Email
@@ -62,16 +80,16 @@ export default function Login() {
               onChange={(e) => setEmail(e.target.value)}
               className='w-full'
               placeholder='admin@example.com'
+              autoComplete='username'
             />
           </div>
 
-          {/* Password */}
           <div className='field'>
             <label htmlFor='password' className='block mb-2'>
               Password
             </label>
             <Password
-              inputId='password' // <-- use inputId for Password
+              inputId='password'
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               feedback={false}
@@ -79,6 +97,7 @@ export default function Login() {
               className='w-full'
               inputClassName='w-full'
               placeholder='••••••••'
+              autoComplete='current-password'
             />
           </div>
 
@@ -90,6 +109,7 @@ export default function Login() {
             icon='pi pi-sign-in'
             size='large'
             className='w-full'
+            loading={loading}
           />
         </form>
       </Dialog>

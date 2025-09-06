@@ -1,31 +1,17 @@
-import { useEffect, useState } from 'react';
-import { listUsers, deleteUser, User } from './api';
 import { Link } from 'react-router-dom';
-import { Button } from 'primereact/button';
+import { useListUsersQuery, useDeleteUserMutation } from './features/usersApi';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
+import { Button } from 'primereact/button';
 
 export default function UsersList() {
-  const [users, setUsers] = useState<User[]>([]);
+  const { data: users = [], isLoading } = useListUsersQuery();
+  const [deleteUser] = useDeleteUserMutation();
 
-  async function refresh() {
-    setUsers(await listUsers());
-  }
-
-  useEffect(() => {
-    refresh();
-  }, []);
-
-  // custom renderer for the "enabled" column
-  const enabledTemplate = (row: User) => (
-    <span>{row.enabled ? 'Yes' : 'No'}</span>
-  );
-
-  // custom renderer for the "actions" column
-  const actionTemplate = (row: User) => (
+  const actions = (row: any) => (
     <div className='flex gap-2'>
       <Link to={`/users/${row.id}/edit`}>
-        <Button label='Edit' icon='pi pi-pencil' severity='info' size='small' />
+        <Button label='Edit' icon='pi pi-pencil' size='small' />
       </Link>
       <Button
         label='Delete'
@@ -33,11 +19,8 @@ export default function UsersList() {
         severity='danger'
         size='small'
         onClick={async () => {
-          if (!row.id) return;
-          if (window.confirm(`Delete ${row.email}?`)) {
+          if (row.id && window.confirm(`Delete ${row.email}?`))
             await deleteUser(row.id);
-            refresh();
-          }
         }}
       />
     </div>
@@ -50,28 +33,19 @@ export default function UsersList() {
           <Button label='Create User' icon='pi pi-plus' severity='success' />
         </Link>
       </div>
-
       <DataTable
         value={users}
+        loading={isLoading}
         paginator
         rows={5}
-        rowsPerPageOptions={[5, 10, 20]}
         stripedRows
         emptyMessage='No users found'
-        tableStyle={{ minWidth: '50rem' }}
       >
-        <Column
-          header='Name'
-          body={(row: User) => `${row.firstName} ${row.lastName}`}
-        />
+        <Column header='Name' body={(r) => `${r.firstName} ${r.lastName}`} />
         <Column field='email' header='Email' />
         <Column field='role' header='Role' />
-        <Column header='Enabled' body={enabledTemplate} />
-        <Column
-          header='Actions'
-          body={actionTemplate}
-          style={{ width: '200px' }}
-        />
+        <Column header='Enabled' body={(r) => (r.enabled ? 'Yes' : 'No')} />
+        <Column header='Actions' body={actions} style={{ width: 220 }} />
       </DataTable>
     </div>
   );
