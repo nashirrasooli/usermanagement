@@ -5,6 +5,22 @@ body {
   margin: 0;
 }
 
+/* target our confirm dialog instance via the custom class */
+.cool-confirm .p-dialog {
+  animation: drop-in 180ms ease-out;
+}
+@keyframes drop-in {
+  from {
+    transform: translateY(-16px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+
 
 .login-dialog {
   border-radius: 16px;
