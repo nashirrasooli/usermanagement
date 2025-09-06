@@ -16,8 +16,33 @@ public class AppUserService {
         this.repo = repo;
     }
 
+    // Default list (no filtering)
     public List<UserResponse> findAll() {
         return repo.findAll().stream().map(this::toResponse).toList();
+    }
+
+    // Flexible search: q (matches first or last), or firstName/lastName separately
+    public List<UserResponse> search(String q, String firstName, String lastName) {
+        List<AppUser> users;
+
+        boolean hasQ = q != null && !q.isBlank();
+        boolean hasFirst = firstName != null && !firstName.isBlank();
+        boolean hasLast = lastName != null && !lastName.isBlank();
+
+        if (hasQ) {
+            users = repo.findByFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCase(q.trim(), q.trim());
+        } else if (hasFirst && hasLast) {
+            users = repo.findByFirstNameContainingIgnoreCaseAndLastNameContainingIgnoreCase(firstName.trim(),
+                    lastName.trim());
+        } else if (hasFirst) {
+            users = repo.findByFirstNameContainingIgnoreCase(firstName.trim());
+        } else if (hasLast) {
+            users = repo.findByLastNameContainingIgnoreCase(lastName.trim());
+        } else {
+            users = repo.findAll();
+        }
+
+        return users.stream().map(this::toResponse).toList();
     }
 
     public UserResponse findById(UUID id) {

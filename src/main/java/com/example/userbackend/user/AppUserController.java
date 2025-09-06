@@ -18,9 +18,13 @@ public class AppUserController {
         this.service = service;
     }
 
+    // GET /api/users?q=... OR /api/users?firstName=...&lastName=...
     @GetMapping
-    public List<UserResponse> all() {
-        return service.findAll();
+    public List<UserResponse> all(
+            @RequestParam(required = false) String q,
+            @RequestParam(required = false) String firstName,
+            @RequestParam(required = false) String lastName) {
+        return service.search(q, firstName, lastName);
     }
 
     @GetMapping("{id}")
