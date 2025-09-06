@@ -1,14 +1,15 @@
-
 import axios from 'axios';
-import type { UserRequest } from './types';
+import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+import type { UserRequest } from './users/types';
 
-export const api = axios.create({
+// --- Axios instance for manual calls ---
+export const axiosApi = axios.create({
   baseURL: process.env.REACT_APP_API_BASE_URL || 'http://localhost:8080/api',
 });
 
 // Attach token to every request
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token'); // keep consistent with authSlice
+axiosApi.interceptors.request.use((config) => {
+  const token = localStorage.getItem('token'); // consistent with authSlice
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -16,7 +17,7 @@ api.interceptors.request.use((config) => {
 });
 
 // Handle 401 responses globally
-api.interceptors.response.use(
+axiosApi.interceptors.response.use(
   (res) => res,
   (err) => {
     if (err?.response?.status === 401) {
@@ -27,6 +28,21 @@ api.interceptors.response.use(
     return Promise.reject(err);
   }
 );
+
+// --- RTK Query base API (for injectEndpoints) ---
+export const api = createApi({
+  reducerPath: 'api',
+  baseQuery: fetchBaseQuery({
+    baseUrl: process.env.REACT_APP_API_BASE_URL || 'http://localhost:8080/api',
+    prepareHeaders: (headers) => {
+      const token = localStorage.getItem('token');
+      if (token) headers.set('authorization', `Bearer ${token}`);
+      return headers;
+    },
+  }),
+  tagTypes: ['Users', 'User'],
+  endpoints: () => ({}),
+});
 
 // --- Types ---
 export type User = {
@@ -39,19 +55,18 @@ export type User = {
   password?: string; // backend may ignore on update if empty
 };
 
-// --- API functions ---
+// --- Axios-based API functions (manual) ---
 export const getUser = (id: string): Promise<User> =>
-  api.get(`/users/${id}`).then((r) => r.data as User);
+  axiosApi.get(`/users/${id}`).then((r) => r.data as User);
 
 export const listUsers = (): Promise<User[]> =>
-  api.get('/users').then((r) => r.data);
+  axiosApi.get('/users').then((r) => r.data);
 
 export const createUser = (payload: UserRequest): Promise<User> =>
-  api.post('/users', payload).then((r) => r.data);
+  axiosApi.post('/users', payload).then((r) => r.data);
 
 export const updateUser = (id: string, payload: UserRequest): Promise<User> =>
-  api.put(`/users/${id}`, payload).then((r) => r.data);
+  axiosApi.put(`/users/${id}`, payload).then((r) => r.data);
 
 export const deleteUser = (id: string): Promise<void> =>
-  api.delete(`/users/${id}`).then((r) => r.data);
-
+  axiosApi.delete(`/users/${id}`).then((r) => r.data);

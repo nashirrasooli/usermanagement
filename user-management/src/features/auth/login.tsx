@@ -1,11 +1,11 @@
 import { FormEvent, useState } from 'react';
-import { useAuth } from './auth';
 import { Dialog } from 'primereact/dialog';
 import { InputText } from 'primereact/inputtext';
 import { Password } from 'primereact/password';
 import { Button } from 'primereact/button';
 import { Message } from 'primereact/message';
 import { toast } from 'react-toastify';
+import { useAuth } from './auth';
 
 export default function Login() {
   const { login } = useAuth(); // Redux-backed hook

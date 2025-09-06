@@ -1,6 +1,5 @@
 import { useEffect, useState, FormEvent } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { getUser, createUser, updateUser, type User } from './api';
 import { InputText } from 'primereact/inputtext';
 import { Dropdown } from 'primereact/dropdown';
 import { Checkbox } from 'primereact/checkbox';
@@ -9,6 +8,7 @@ import { Button } from 'primereact/button';
 import { Message } from 'primereact/message';
 import { Card } from 'primereact/card';
 import { toast } from 'react-toastify';
+import { createUser, getUser, updateUser, User } from '../api';
 
 const blank: User = {
   firstName: '',

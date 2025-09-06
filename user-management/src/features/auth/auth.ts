@@ -1,6 +1,6 @@
 
-import { logout as logoutAction, setToken } from './features/authSlice';
-import { useAppDispatch, useAppSelector } from './hook';
+import { useAppDispatch, useAppSelector } from '../../app/hook';
+import { logout as logoutAction, setToken } from './authSlice';
 
 export function useAuth() {
   const dispatch = useAppDispatch();

@@ -1,10 +1,9 @@
-// src/App.tsx
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from './auth';
-import UsersList from './UsersList';
+import { useAuth } from './features/auth/auth';
 import { Toolbar } from 'primereact/toolbar';
 import { Button } from 'primereact/button';
 import { toast } from 'react-toastify';
+import UsersList from './users/UsersList';
 
 export default function App() {
   const nav = useNavigate();

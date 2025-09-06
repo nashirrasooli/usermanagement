@@ -8,12 +8,12 @@ import 'primeicons/primeicons.css'; // icons
 import 'primeflex/primeflex.css';
 
 import App from './App';
-import ProtectedRoute from './ProtectedRoute';
-import Login from './login';
-import UserUpdate from './UserUpdate';
 import { Provider } from 'react-redux';
-import { store } from './store';
+import { store } from './app/store';
 import { ToastContainer } from 'react-toastify';
+import ProtectedRoute from './features/auth/ProtectedRoute';
+import UserUpdate from './users/UserUpdate';
+import Login from './features/auth/login';
 
 console.log('React version loaded:', React.version);
 
